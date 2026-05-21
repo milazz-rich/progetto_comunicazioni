@@ -210,4 +210,3 @@ def update_preview(_, upload_contents, mode, upload_filename):
 
 if __name__ == "__main__":
     app.run(debug=True)
-
