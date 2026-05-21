@@ -3,7 +3,7 @@ from ultralytics import YOLO
 
 CONFIDANCE = 0.5
 
-def getPredction(frame):
+def getPrediction(frame):
   model = YOLO("yolo26n.pt")
   results = model.predict(
       source=frame,
