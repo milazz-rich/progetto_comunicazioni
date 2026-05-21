@@ -76,6 +76,40 @@ app.layout = html.Div(
                     inputStyle={"marginRight": "8px", "marginLeft": "14px"},
                     labelStyle={"fontWeight": "600", "color": "#203354"},
                 ),
+                html.Div(
+                    style={
+                        "marginBottom": "18px",
+                        "padding": "14px 16px",
+                        "background": "linear-gradient(90deg, #edf3ff 0%, #f7fbff 100%)",
+                        "border": "1px solid #c9d9fb",
+                        "borderRadius": "12px",
+                    },
+                    children=[
+                        html.Div(
+                            "Confidance modello",
+                            style={"fontWeight": "700", "color": "#1f3359", "marginBottom": "8px"},
+                        ),
+                        dcc.Slider(
+                            id="confidance-slider",
+                            min=0.1,
+                            max=0.95,
+                            step=0.05,
+                            value=0.5,
+                            marks={
+                                0.1: "0.10",
+                                0.3: "0.30",
+                                0.5: "0.50",
+                                0.7: "0.70",
+                                0.95: "0.95",
+                            },
+                            tooltip={"placement": "bottom", "always_visible": False},
+                        ),
+                        html.Div(
+                            id="confidance-value",
+                            style={"marginTop": "8px", "fontWeight": "600", "color": "#264472"},
+                        ),
+                    ],
+                ),
                 html.Div(id="mode-note", style={"marginBottom": "12px", "color": "#28436f"}),
                 dcc.Upload(
                     id="file-upload",
@@ -154,16 +188,17 @@ def render_upload(mode):
     Input("live-interval", "n_intervals"),
     Input("file-upload", "contents"),
     Input("mode-switch", "value"),
+    Input("confidance-slider", "value"),
     State("file-upload", "filename"),
 )
-def update_preview(_, upload_contents, mode, upload_filename):
+def update_preview(_, upload_contents, mode, confidance, upload_filename):
     global VIDEO_CAPTURE, VIDEO_PATH, VIDEO_KEY
     try:
         if mode == "live":
             ok, frame = WEBCAM.read()
             if not ok:
                 return ""
-            predicted = getPrediction(frame)
+            predicted = getPrediction(frame, confidance)
             return frame_to_data_url(predicted)
 
         if not upload_contents:
@@ -202,10 +237,18 @@ def update_preview(_, upload_contents, mode, upload_filename):
         if frame is None:
             return ""
 
-        predicted = getPrediction(frame)
+        predicted = getPrediction(frame, confidance)
         return frame_to_data_url(predicted)
     except Exception:
         return ""
+
+
+@app.callback(
+    Output("confidance-value", "children"),
+    Input("confidance-slider", "value"),
+)
+def render_confidance_value(confidance):
+    return f"Valore attuale: {confidance:.2f}"
 
 
 if __name__ == "__main__":

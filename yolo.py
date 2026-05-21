@@ -1,13 +1,11 @@
 import cv2
 from ultralytics import YOLO
 
-CONFIDANCE = 0.5
-
-def getPrediction(frame):
+def getPrediction(frame, confidance):
   model = YOLO("yolo26n.pt")
   results = model.predict(
       source=frame,
-      conf=CONFIDANCE,
+      conf=confidance,
       classes=[0],
       verbose=False,
       stream=True
